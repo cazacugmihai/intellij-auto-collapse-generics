@@ -73,6 +73,18 @@ class AutoCollapseGenericsStartupActivity : /*StartupActivity,*/ ProjectActivity
                         }
                     }
                 }
+
+                // Fold generics in fields
+                psiClass.fields.forEach { field ->
+                    val typeElement = field.typeElement
+                    typeElement?.children?.forEach { child ->
+                        if (child is PsiJavaCodeReferenceElement) {
+                            child.parameterList?.let { pl ->
+                                addFoldRegionIfPossible(foldingModel, pl.textRange.startOffset, pl.textRange.endOffset)
+                            }
+                        }
+                    }
+                }
             }
         }
     }
