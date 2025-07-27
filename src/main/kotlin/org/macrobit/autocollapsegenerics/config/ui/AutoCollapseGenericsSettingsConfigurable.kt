@@ -26,7 +26,7 @@ private const val MIN_TEXT_LENGTH_COLUMN = 4
 class AutoCollapseGenericsSettingsConfigurable : Configurable {
   private lateinit var mainPanel: JPanel
   private lateinit var enabledCheckBox: JBCheckBox
-  private lateinit var foldingRules: JTable
+  private lateinit var foldingRulesTable: JTable
 
   private val settings = AutoCollapseGenericsSettings.Companion.getInstance()
 
@@ -74,18 +74,16 @@ class AutoCollapseGenericsSettingsConfigurable : Configurable {
       }
     }
 
-    foldingRules = JBTable(model)
-    foldingRules.rowHeight = 24
-
+    foldingRulesTable = JBTable(model)
     customizeTableColumns()
 
-    val scrollPane = JBScrollPane(foldingRules)
+    val scrollPane = JBScrollPane(foldingRulesTable)
     mainPanel.add(scrollPane, BorderLayout.CENTER)
 
     // Enable/disable table editing dynamically
     fun updateTableEnabledState() {
-      foldingRules.isEnabled = enabledCheckBox.isSelected
-      foldingRules.repaint()
+      foldingRulesTable.isEnabled = enabledCheckBox.isSelected
+      foldingRulesTable.repaint()
     }
 
     enabledCheckBox.addActionListener {
@@ -98,20 +96,24 @@ class AutoCollapseGenericsSettingsConfigurable : Configurable {
   }
 
   private fun customizeTableColumns() {
+    foldingRulesTable.rowHeight = 24
+
     customizeEnabledColumn()
     customizeFoldingTargetColumn()
     customizeFoldingConditionColumn()
+    customizeMinGenericCountColumn()
+    customizeMinTextLengthColumn()
   }
 
   private fun customizeEnabledColumn() {
-    val enabledColumn = foldingRules.columnModel.getColumn(ENABLED_COLUMN)
+    val enabledColumn = foldingRulesTable.columnModel.getColumn(ENABLED_COLUMN)
     enabledColumn.maxWidth = 100
     enabledColumn.preferredWidth = 100
     enabledColumn.minWidth = 30
   }
 
   private fun customizeFoldingTargetColumn() {
-    val foldingTargetColumn = foldingRules.columnModel.getColumn(FOLDING_TARGET_COLUMN)
+    val foldingTargetColumn = foldingRulesTable.columnModel.getColumn(FOLDING_TARGET_COLUMN)
     foldingTargetColumn.cellRenderer = object : DefaultTableCellRenderer() {
       override fun setValue(value: Any?) {
         val target = value as? FoldingTarget
@@ -121,7 +123,7 @@ class AutoCollapseGenericsSettingsConfigurable : Configurable {
   }
 
   private fun customizeFoldingConditionColumn() {
-    val foldingConditionColumn = foldingRules.columnModel.getColumn(FOLDING_CONDITION_COLUMN)
+    val foldingConditionColumn = foldingRulesTable.columnModel.getColumn(FOLDING_CONDITION_COLUMN)
     val foldingConditionComboBox = ComboBox(FoldingCondition.entries.toTypedArray(), 120)
     foldingConditionComboBox.setRenderer(object : ListCellRenderer<FoldingCondition> {
       private val defaultRenderer = DefaultListCellRenderer()
@@ -149,10 +151,18 @@ class AutoCollapseGenericsSettingsConfigurable : Configurable {
     }
   }
 
+  private fun customizeMinGenericCountColumn() {
+    foldingRulesTable.columnModel.getColumn(MIN_GENERIC_COUNT_COLUMN).cellEditor = SpinnerCellEditor()
+  }
+
+  private fun customizeMinTextLengthColumn() {
+    foldingRulesTable.columnModel.getColumn(MIN_TEXT_LENGTH_COLUMN).cellEditor = SpinnerCellEditor()
+  }
+
   override fun isModified(): Boolean {
     if (enabledCheckBox.isSelected != settings.state.enabled) return true
 
-    val model = foldingRules.model
+    val model = foldingRulesTable.model
     val foldingRulesByTarget = settings.state.foldingRulesByTarget
     for (row in 0 until model.rowCount) {
       val target = model.getValueAt(row, FOLDING_TARGET_COLUMN) as FoldingTarget
@@ -169,7 +179,7 @@ class AutoCollapseGenericsSettingsConfigurable : Configurable {
   override fun apply() {
     settings.state.enabled = enabledCheckBox.isSelected
 
-    val model = foldingRules.model
+    val model = foldingRulesTable.model
     val updated = mutableMapOf<FoldingTarget, FoldingRule>()
     for (row in 0 until model.rowCount) {
       val enabled = model.getValueAt(row, ENABLED_COLUMN) as Boolean
@@ -190,7 +200,7 @@ class AutoCollapseGenericsSettingsConfigurable : Configurable {
     enabledCheckBox.isSelected = settings.state.enabled
 
     val foldingRulesByTarget = settings.state.foldingRulesByTarget
-    val model = foldingRules.model
+    val model = foldingRulesTable.model
     for (row in 0 until model.rowCount) {
       val target = model.getValueAt(row, FOLDING_TARGET_COLUMN) as FoldingTarget
       val current = foldingRulesByTarget[target] ?: continue
