@@ -31,8 +31,16 @@
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="org.macrobit.autocollapsegenerics.config.storage.AutoCollapseGenericsSettings"/>
+        <!--<projectService serviceImplementation="org.macrobit.autocollapsegenerics.config.storage.AutoCollapseGenericsSettings"/>-->
         <postStartupActivity
-                implementation="org.macrobit.autocollapsegenerics.AutoCollapseGenericsStartupActivity" />
+                implementation="org.macrobit.autocollapsegenerics.AutoCollapseGenericsStartupActivity"/>
+
+        <applicationConfigurable
+                parentId="tools"
+                id="autoCollapseGenerics"
+                displayName="Auto Collapse Generics"
+                provider="org.macrobit.autocollapsegenerics.config.AutoCollapseGenericsConfigurable"/>
     </extensions>
 
 </idea-plugin>
