@@ -192,9 +192,9 @@ class AutoCollapseGenericsSettingsConfigurable : Configurable {
     val foldingRulesByTarget = settings.state.foldingRulesByTarget
     val model = foldingRules.model
     for (row in 0 until model.rowCount) {
-      val target = model.getValueAt(row, ENABLED_COLUMN) as FoldingTarget
+      val target = model.getValueAt(row, FOLDING_TARGET_COLUMN) as FoldingTarget
       val current = foldingRulesByTarget[target] ?: continue
-      model.setValueAt(current.enabled, row, FOLDING_TARGET_COLUMN)
+      model.setValueAt(current.enabled, row, ENABLED_COLUMN)
       model.setValueAt(current.condition, row, FOLDING_CONDITION_COLUMN)
       model.setValueAt(current.minGenericCount, row, MIN_GENERIC_COUNT_COLUMN)
       model.setValueAt(current.minTextLength, row, MIN_TEXT_LENGTH_COLUMN)
