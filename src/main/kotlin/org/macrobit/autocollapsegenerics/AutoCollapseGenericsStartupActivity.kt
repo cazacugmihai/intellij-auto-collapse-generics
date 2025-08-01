@@ -120,8 +120,22 @@ class AutoCollapseGenericsStartupActivity : ProjectActivity {
     foldingModel: FoldingModel
   ) {
     psiClass.methods.forEach { method ->
+      tryFoldMethodsTypeParameterGenerics(foldingRulesByTarget, method, document, foldingModel)
       tryFoldMethodsReturnTypeGenerics(foldingRulesByTarget, method, document, foldingModel)
       tryFoldMethodParametersGenerics(foldingRulesByTarget, method, document, foldingModel)
+    }
+  }
+
+  private fun tryFoldMethodsTypeParameterGenerics(
+    foldingRulesByTarget: Map<FoldingTarget, FoldingRule>,
+    method: PsiMethod,
+    document: Document,
+    foldingModel: FoldingModel
+  ) {
+    foldingRulesByTarget[FoldingTarget.METHOD_TYPE_PARAMETER]?.takeIf { it.enabled }?.let { foldingRule ->
+      method.typeParameterList?.let {
+        tryFold( document, foldingModel, it.textRange.startOffset, it.textRange.endOffset, foldingRule)
+      }
     }
   }
 
