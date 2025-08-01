@@ -26,9 +26,31 @@ class AutoCollapseGenericsSettings : SerializablePersistentStateComponent<AutoCo
 
   override fun loadState(state: State) {
     // Fix: ensure all enum values are present even if missing from the XML
+
+    val existing = state.foldingRulesByTarget
+    val newMap = LinkedHashMap<FoldingTarget, FoldingRule>()
+
     for (target in FoldingTarget.entries) {
-      if (target !in state.foldingRulesByTarget) {
-        state.foldingRulesByTarget[target] = FoldingRule(
+      if (target == FoldingTarget.METHOD_RETURN) {
+        // Insert missing keys before METHOD_RETURN
+        for (entry in FoldingTarget.entries) {
+          if (entry != FoldingTarget.METHOD_RETURN &&
+            entry !in existing
+          ) {
+            newMap[entry] = FoldingRule(
+              minGenericCount = 1,
+              minTextLength = 15,
+              condition = FoldingCondition.GENERIC_COUNT,
+              enabled = true,
+            )
+          }
+        }
+      }
+
+      if (target in existing) {
+        newMap[target] = existing[target]!!
+      } else if (target !in newMap) {
+        newMap[target] = FoldingRule(
           minGenericCount = 1,
           minTextLength = 15,
           condition = FoldingCondition.GENERIC_COUNT,
@@ -37,6 +59,7 @@ class AutoCollapseGenericsSettings : SerializablePersistentStateComponent<AutoCo
       }
     }
 
+    state.foldingRulesByTarget = newMap
     super.loadState(state)
   }
 
