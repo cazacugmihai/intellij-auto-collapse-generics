@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "org.macrobit"
-version = "1.1.3"
+version = "1.2.0"
 
 repositories {
     mavenCentral()
