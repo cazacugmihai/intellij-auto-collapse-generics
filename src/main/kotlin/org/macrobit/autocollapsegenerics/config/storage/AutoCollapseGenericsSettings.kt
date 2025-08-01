@@ -24,6 +24,22 @@ class AutoCollapseGenericsSettings : SerializablePersistentStateComponent<AutoCo
     }.toMutableMap()
   }
 
+  override fun loadState(state: State) {
+    // Fix: ensure all enum values are present even if missing from the XML
+    for (target in FoldingTarget.entries) {
+      if (target !in state.foldingRulesByTarget) {
+        state.foldingRulesByTarget[target] = FoldingRule(
+          minGenericCount = 1,
+          minTextLength = 15,
+          condition = FoldingCondition.GENERIC_COUNT,
+          enabled = true,
+        )
+      }
+    }
+
+    super.loadState(state)
+  }
+
   companion object {
     fun getInstance(): AutoCollapseGenericsSettings = service()
   }
